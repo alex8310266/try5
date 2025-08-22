@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<title>手機搜尋系統 (Google Sheet)</title>
+<style>
+  body { font-family: Arial; background:#f9f9f9; padding:20px; }
+  .container { background:white; padding:20px; border-radius:10px; max-width:400px; margin:auto; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+  select, input, button { width:100%; padding:10px; margin:10px 0; border-radius:5px; border:1px solid #ccc; }
+  button { background:#4CAF50; color:white; font-weight:bold; cursor:pointer; }
+  button:hover { background:#45a049; }
+  .results p { background:#eee; padding:8px; border-radius:5px; margin:5px 0; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🔍 搜尋系統</h1>
+
+  <label for="category">請選擇類別：</label>
+  <select id="category">
+    <option value="products">產品</option>
+    <option value="faqs">常見問題</option>
+  </select>
+
+  <label for="keyword">輸入關鍵字：</label>
+  <input type="text" id="keyword" placeholder="輸入關鍵字...">
+
+  <button onclick="search()">搜尋</button>
+
+  <div class="results" id="results"></div>
+</div>
+
+<script>
+let data = { products: [], faqs: [] };
+
+// 將下面連結換成你自己的 Google Sheet CSV 連結
+const productsCSV = "https://docs.google.com/spreadsheets/d/1zLA8QxRXg1TX0j3DspXQy7ZPY79q5J-KnVkCehTjK5g/gviz/tq?tqx=out:csv&sheet=Products";
+const faqsCSV = "https://docs.google.com/spreadsheets/d/1zLA8QxRXg1TX0j3DspXQy7ZPY79q5J-KnVkCehTjK5g/gviz/tq?tqx=out:csv&sheet=FAQs";
+
+function loadCSV(url, category) {
+  fetch(url)
+    .then(res => res.text())
+    .then(text => {
+      data[category] = text.trim().split("\n");
+    })
+    .catch(err => console.error("載入資料失敗:", category, err));
+}
+
+// 載入資料
+loadCSV(productsCSV, "products");
+loadCSV(faqsCSV, "faqs");
+
+function search() {
+  const category = document.getElementById("category").value;
+  const keyword = document.getElementById("keyword").value.toLowerCase();
+  const resultsDiv = document.getElementById("results");
+  
+  const results = data[category].filter(item => item.toLowerCase().includes(keyword));
+  resultsDiv.innerHTML = "";
+  
+  if(results.length === 0) {
+    resultsDiv.innerHTML = `<p>❌ 找不到與「${keyword}」相關的結果。</p>`;
+  } else {
+    resultsDiv.innerHTML = results.map(item => `<p>${item}</p>`).join("");
+  }
+}
+</script>
+</body>
+</html>
